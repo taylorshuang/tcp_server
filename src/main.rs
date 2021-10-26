@@ -1,24 +1,46 @@
 use std::net::{TcpListener, TcpStream};
 use std::thread;
-use std::io::{Read, Write, Error};
+use std::io::{Read, Write};
+use std::str;
+
+
 
 // Handles a single client
-fn handle_client(mut stream: TcpStream) -> Result<(), Error> {
-    //output incoming connection information
-    println!("Incoming connection from: {}", stream.peer_addr()?);
-    //define a mut value to store input data
-    let mut buf = [0; 512];
+fn handle_client(mut stream: TcpStream)  {
 
-    println!("hahah");
-    //use a loop to read input data
-    loop {
-        //read data, and store it into buffer
-        let bytes_read = stream.read(&mut buf)?;
-        println!("{:?}", bytes_read);
-        //judge whether success to read 
-        if bytes_read == 0 { return Ok(()); }
-        stream.write(&buf[..bytes_read])?;
+
+    let mut buf = [0; 512];
+       
+    //read data from tcp client, and store into buffer
+    let bytes_read = stream.read(&mut buf);
+    //if the length of buf is zero,we will return ok
+    match bytes_read {
+        Ok(_) =>{ 
+            println!("Input stream is ok!");
+        }
+        Err(_err) => println!("Input stream is error!")
     }
+
+    //print the request
+    println!("Input data is {}", String::from_utf8_lossy(&buf[..]));
+
+    //define return data 
+    let echo = b"echo:hello world".to_vec();
+    // convert the message to string
+    let s = match str::from_utf8(&echo) {
+        Ok(v) => v,
+        Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
+    };
+    //format a string 
+    let response = format!(
+        "{}",
+        s
+     );
+    println!("{}",response);
+    // write the message back to the stream
+    stream.write(response.as_bytes()).unwrap();
+    //clean stream
+    stream.flush().unwrap();
 }
 
 
@@ -35,7 +57,9 @@ fn main() {
             // if ok, will excute handle_client function
             Ok(stream) => {
                 // std::thread::spawn will creates a new thread
-                thread::spawn(move || {handle_client(stream);});
+                thread::spawn(move || {
+                handle_client(stream);
+                });
                 
             }
             
