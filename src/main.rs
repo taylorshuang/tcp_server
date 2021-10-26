@@ -7,8 +7,7 @@ use std::str;
 
 // Handles a single client
 fn handle_client(mut stream: TcpStream)  {
-
-
+    //Diffine a buffer to store stream data
     let mut buf = [0; 512];
        
     //read data from tcp client, and store into buffer
@@ -25,7 +24,7 @@ fn handle_client(mut stream: TcpStream)  {
     println!("Input data is {}", String::from_utf8_lossy(&buf[..]));
 
     //define return data 
-    let echo = b"echo:hello world".to_vec();
+    let echo = b"echo: Hello world!".to_vec();
     // convert the message to string
     let s = match str::from_utf8(&echo) {
         Ok(v) => v,
